@@ -6,7 +6,7 @@ GIT_TAG v1.16.0
 FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
 
-foreach(test object_core_test)
+foreach(test object_core_test product_test)
   add_executable(${test} ${test}.cpp)
   target_link_libraries(${test} PRIVATE Core gtest_main)
   gtest_discover_tests(${test})

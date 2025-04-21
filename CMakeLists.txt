@@ -28,13 +28,11 @@ include(GNUInstallDirs)
 include(InstallRequiredSystemLibraries)
 
 find_package(Qt6 COMPONENTS Core)
-add_library(Core include/object_core.hpp src/object_core.cpp)
+add_library(Core include/object_core.hpp src/object_core.cpp include/product.hpp src/product.cpp)
 target_include_directories(
   Core PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
               "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Esterv/>")
 target_link_libraries(Core PUBLIC Qt6::Core)
-# add_library(Product include/product.hpp src/product.cpp)
-# target_link_libraries(Product PUBLIC Core)
 
 if(BUILD_SERVER)
 
