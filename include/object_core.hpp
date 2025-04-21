@@ -5,7 +5,13 @@
 #include <QJsonObject>
 #include <QRandomGenerator>
 
-enum HashSecurity : quint8 { VeryLow = 4, Low = 8, Medium = 12, High = 16, VeryHigh = 32 };
+enum HashSecurity : quint8 {
+  VeryLow = 4,
+  Low = 8,
+  Medium = 12,
+  High = 16,
+  VeryHigh = 32
+};
 
 template <HashSecurity S> using Id = std::array<quint8, static_cast<size_t>(S)>;
 
@@ -32,11 +38,7 @@ template <class T, HashSecurity S> class CoreBase {
 protected:
   const T m_type;
 
-  CoreBase(T typ)
-      : m_type(typ)
-      , m_id{generateId()}
-  {
-  }
+  CoreBase(T typ) : m_type(typ), m_id{generateId()} {}
   CoreBase(T typ, QByteArray id) : m_type(typ), m_id{fromQByteArray(id)} {}
   CoreBase(T typ, const QJsonValue &val)
       : CoreBase(typ, QByteArray::fromHex(
@@ -62,17 +64,15 @@ protected:
     var.insert("type", (int)m_type);
     var.insert("id", QString(id().toHex()));
   }
-  [[nodiscard]] static T getType(const QJsonValue &val)
-  {
-      return ((T) val.toObject()["type"].toInt());
+  [[nodiscard]] static T getType(const QJsonValue &val) {
+    return ((T)val.toObject()["type"].toInt());
   }
 
   [[nodiscard]]
-  static T getType(QDataStream &val)
-  {
-      T type_;
-      val >> type_;
-      return type_;
+  static T getType(QDataStream &val) {
+    T type_;
+    val >> type_;
+    return type_;
   }
 
 public:
