@@ -1,4 +1,5 @@
 #include "object_core.hpp"
+#include <gtest/gtest.h>
 
 enum CarType : quint8 { Lambo, Lada, Panda };
 
@@ -15,7 +16,7 @@ public:
         : CoreBase(typ, in) {};
 };
 
-int main(int argc, char **argv)
+TEST(CoreBase, Serialization)
 {
     const auto lambo = Car(Lambo);
     const auto lambo_json = lambo.json();
@@ -30,6 +31,9 @@ int main(int argc, char **argv)
     qDebug() << "lambo_copy_from_json_json:" << lambo_copy_from_json_json;
     qDebug() << "lambo_copy_from_json_bin:" << lambo_copy_from_json_bin.toHex();
 
+    EXPECT_EQ(lambo_json, lambo_copy_from_json_json);
+    EXPECT_EQ(lambo_bin, lambo_copy_from_json_bin);
+
     auto buffer = QDataStream(&lambo_bin, QIODevice::ReadOnly);
     CarType car_type;
     buffer >> car_type;
@@ -39,5 +43,6 @@ int main(int argc, char **argv)
     qDebug() << "lambo_copy_from_bin_json:" << lambo_copy_from_bin_json;
     qDebug() << "lambo_copy_from_bin_bin:" << lambo_copy_from_bin_bin.toHex();
 
-    return 0;
+    EXPECT_EQ(lambo_json, lambo_copy_from_bin_json);
+    EXPECT_EQ(lambo_bin, lambo_copy_from_bin_bin);
 }
