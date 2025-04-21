@@ -1,0 +1,5 @@
+tags*
+build*
+CMakeLists.txt.user
+CMakeUserPresets.json
+doc/*
