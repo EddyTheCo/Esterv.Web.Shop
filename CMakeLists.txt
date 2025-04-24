@@ -35,7 +35,18 @@ target_include_directories(
               "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Esterv/>")
 target_link_libraries(Core PUBLIC Qt6::Core)
 
+
+
 if(BUILD_SERVER)
+FetchContent_Declare(
+    Boost
+    URL https://github.com/boostorg/boost/releases/download/boost-1.86.0/boost-1.86.0-cmake.7z
+    URL_MD5 c33bf9137ff5ff1d3d0f28af212c9704
+    FIND_PACKAGE_ARGS 1.86 COMPONENTS system CONFIG)
+  set(BOOST_INCLUDE_LIBRARIES asio beast system)
+  set(BOOST_ENABLE_CMAKE ON)
+  FetchContent_MakeAvailable(Boost)
+add_library(TCPServer src/server.hpp src/server.cpp src/session.hpp src/session.cpp)
 
 endif(BUILD_SERVER)
 
