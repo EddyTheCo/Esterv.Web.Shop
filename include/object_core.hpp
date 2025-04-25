@@ -40,9 +40,9 @@ protected:
 
   CoreBase(T typ) : m_type(typ), m_id{generateId()} {}
   CoreBase(T typ, QByteArray id) : m_type(typ), m_id{fromQByteArray(id)} {}
-  CoreBase(T typ, const QJsonValue &val)
-      : CoreBase(typ, QByteArray::fromHex(
-                          val.toObject()["id"].toString().toUtf8())) {}
+  CoreBase(T typ, const QJsonObject &val)
+      : CoreBase(typ, QByteArray::fromHex(val["id"].toString().toUtf8()))
+  {}
   CoreBase(T typ, QDataStream &in)
       : CoreBase(typ, [&in]() {
           in.setByteOrder(QDataStream::LittleEndian);
@@ -64,9 +64,7 @@ protected:
     var.insert("type", (int)m_type);
     var.insert("id", QString(id().toHex()));
   }
-  [[nodiscard]] static T getType(const QJsonValue &val) {
-    return ((T)val.toObject()["type"].toInt());
-  }
+  [[nodiscard]] static T getType(const QJsonObject &val) { return ((T) val["type"].toInt()); }
 
   [[nodiscard]]
   static T getType(QDataStream &val) {

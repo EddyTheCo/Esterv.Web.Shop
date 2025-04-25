@@ -2,13 +2,13 @@
 
 #include "object_core.hpp"
 
-#include <QObject>
 enum ProductType : quint8 { Basic };
 
-class Product : virtual public CoreBase<ProductType, High>, public QObject {
-  quint64 m_price;
-  QString m_name;
-  QString m_description;
+class Product : virtual public CoreBase<ProductType, High>
+{
+    quint64 m_price;
+    QString m_name;
+    QString m_description;
 
 protected:
   Product(const quint64 price, const QString name, const QString description)
@@ -19,11 +19,12 @@ protected:
       : CoreBase(ProductType::Basic, id), m_price{price}, m_name{name},
         m_description{description} {};
 
-  Product(const QJsonValue &val)
-      : m_price{val.toObject()["price"].toString().toULongLong()},
-        m_name{val.toObject()["name"].toString()},
-        m_description{val.toObject()["description"].toString()},
-        CoreBase(ProductType::Basic, val) {}
+  Product(const QJsonObject &val)
+      : m_price{val["price"].toString().toULongLong()}
+      , m_name{val["name"].toString()}
+      , m_description{val["description"].toString()}
+      , CoreBase(ProductType::Basic, val)
+  {}
   Product(QDataStream &in) : CoreBase(ProductType::Basic, in) {
     in >> m_price;
     in >> m_name;
@@ -87,8 +88,10 @@ protected:
                const QString description)
       : Product(price, name, description), CoreBase(ProductType::Basic, id) {}
 
-  BasicProduct(const QJsonValue &val)
-      : Product(val), CoreBase(ProductType::Basic, val) {}
+  BasicProduct(const QJsonObject &val)
+      : Product(val)
+      , CoreBase(ProductType::Basic, val)
+  {}
   BasicProduct(QDataStream &in)
       : Product(in), CoreBase(ProductType::Basic, in) {}
   friend class Product;

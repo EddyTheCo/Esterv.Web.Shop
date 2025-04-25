@@ -7,7 +7,8 @@ class Car : public CoreBase<CarType, HashSecurity::VeryLow> {
 public:
   Car(CarType typ) : CoreBase(typ){};
   Car(CarType typ, QByteArray id) : CoreBase(typ, id){};
-  Car(CarType typ, const QJsonValue &val) : CoreBase(typ, val){};
+  Car(CarType typ, const QJsonObject &val)
+      : CoreBase(typ, val) {};
   Car(CarType typ, QDataStream &in) : CoreBase(typ, in){};
 };
 
