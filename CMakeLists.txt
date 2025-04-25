@@ -29,7 +29,7 @@ include(InstallRequiredSystemLibraries)
 
 find_package(Qt6 COMPONENTS Core)
 add_library(Core include/object_core.hpp src/object_core.cpp
-                 include/product.hpp src/product.cpp)
+                 include/product.hpp src/product.cpp include/request.hpp src/request.cpp)
 target_include_directories(
   Core PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
               "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Esterv/>")
@@ -47,7 +47,8 @@ FetchContent_Declare(
   set(BOOST_ENABLE_CMAKE ON)
   FetchContent_MakeAvailable(Boost)
 add_library(TCPServer src/server.hpp src/server.cpp src/session.hpp src/session.cpp)
-
+target_link_libraries(TCPServer PUBLIC Qt6::Core)
+target_link_libraries(TCPServer PRIVATE Core)
 endif(BUILD_SERVER)
 
 if(BUILD_CLIENT)

@@ -1,5 +1,5 @@
 #include "session.hpp"
-
+#include"request.hpp"
 namespace TCP {
 
 Session::Session(boost::asio::ip::tcp::tcp::socket socket)
@@ -55,5 +55,8 @@ void Session::parse_read(const std::size_t lenght)
         }
         }
 }
-void Session::parse_request(QByteArray request) {}
+void Session::parse_request(QByteArray request_data) {
+    QDataStream in(&request_data, QIODevice::ReadOnly);
+    auto request = Request::from(in);
+}
 } // namespace TCP
