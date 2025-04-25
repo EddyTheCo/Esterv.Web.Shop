@@ -45,15 +45,7 @@ protected:
   }
 
 public:
-  template <typename T> static std::shared_ptr<Product> from(T &val) {
-    const auto type = CoreBase::getType(val);
-    switch (type) {
-    case ProductType::Basic:
-      return std::shared_ptr<Product>{new Product(val)};
-    default:
-      return nullptr;
-    }
-  }
+  template <typename T> static std::shared_ptr<Product> from(T &val);
   [[nodiscard]] auto price() const { return m_price; }
   [[nodiscard]] auto name() const { return m_name; }
   [[nodiscard]] auto description() const { return m_description; }
