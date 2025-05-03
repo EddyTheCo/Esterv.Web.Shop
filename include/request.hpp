@@ -2,43 +2,45 @@
 
 #include "object_core.hpp"
 
+enum class RequestType : quint8 { Products };
+constexpr Core::HashSecurity RequestHashSecurity = Core::Low;
+using RequestBase = Core::Base<RequestType, RequestHashSecurity>;
 
-enum RequestType : quint8 { Products };
-
-enum RequestMethod: quint8 { GET, POST};
-
-class Request : virtual public CoreBase<RequestType, Low>
+class Request : virtual public RequestBase
 {
-    RequestMethod m_method{GET};
+  public:
+using Id = Core::Id<RequestHashSecurity>;
+enum class Method: quint8 { GET, POST};
+  static std::shared_ptr<const Request> from(QDataStream &val);
+  [[nodiscard]] auto method() const { return m_method; }
+ 
+
+  [[nodiscard]] static std::shared_ptr<const Request>
+  Products(const Method method = Method::GET);
+  Method m_method{Method::GET};
 
 protected:
-  Request(const RequestMethod method)
-      : CoreBase{RequestType::Products},m_method{method} {};
+  Request(const Method method)
+      : RequestBase{RequestType::Products},m_method{method} {};
 
-      Request(QDataStream &in) : CoreBase{RequestType::Products, in} {
+      Request(QDataStream &in) : RequestBase{RequestType::Products, in} {
     in >> m_method;
   }
 
   void serialize(QDataStream &out) const override {
-    CoreBase::serialize(out);
+    RequestBase::serialize(out);
     out << m_method;
   }
 
-public:
-  template <typename T> static std::shared_ptr<const Request> from(T &val);
-  [[nodiscard]] auto method() const { return m_method; }
- 
 
-  [[nodiscard]] static std::shared_ptr<Request>
-  Products(const RequestMethod method = GET);
 };
 
 class ProductsRequest : public Request {
 protected:
-ProductsRequest(const RequestMethod method)
-      : Request(method), CoreBase(RequestType::Products) {}
+ProductsRequest(const Method method)
+      : Request(method), RequestBase(RequestType::Products) {}
 
       ProductsRequest(QDataStream &in)
-      : Request(in), CoreBase(RequestType::Products, in) {}
+      : Request(in), RequestBase(RequestType::Products, in) {}
   friend class Request;
 };
