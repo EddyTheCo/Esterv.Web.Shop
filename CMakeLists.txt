@@ -29,7 +29,8 @@ include(InstallRequiredSystemLibraries)
 
 find_package(Qt6 COMPONENTS Core)
 add_library(Core include/object_core.hpp src/object_core.cpp
-                 include/product.hpp src/product.cpp include/request.hpp src/request.cpp)
+                 include/product.hpp src/product.cpp include/request.hpp src/request.cpp include/reply.hpp src/reply.cpp
+                 )
 target_include_directories(
   Core PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
               "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Esterv/>")
