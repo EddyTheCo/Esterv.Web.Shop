@@ -1,4 +1,5 @@
 #include "session.hpp"
+#include "server.hpp"
 #include"request.hpp"
 namespace TCP {
 
@@ -58,5 +59,9 @@ void Session::parse_read(const std::size_t lenght)
 void Session::parse_request(QByteArray request_data) {
     QDataStream in(&request_data, QIODevice::ReadOnly);
     auto request = Request::from(in);
+    /*if(Server::reply_callback_&&request) {
+        // This should be inside a trhead
+        auto reply = Server::reply_callback_(request);
+    }*/
 }
 } // namespace TCP
