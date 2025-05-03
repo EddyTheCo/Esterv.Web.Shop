@@ -6,14 +6,14 @@ enum class ProductType : quint8 { Basic };
 constexpr Core::HashSecurity ProductHashSecurity = Core::High;
 using ProductBase = Core::Base<ProductType, ProductHashSecurity>;
 
-class Product : virtual public ProductBase
-{
-    quint64 m_price;
-    QString m_name;
-    QString m_description;
+class Product : virtual public ProductBase {
+  quint64 m_price;
+  QString m_name;
+  QString m_description;
+
 public:
-    using Id = Core::Id<ProductHashSecurity>;
-    static std::shared_ptr<Product> from(QDataStream &val);
+  using Id = Core::Id<ProductHashSecurity>;
+  static std::shared_ptr<Product> from(QDataStream &val);
   [[nodiscard]] auto price() const { return m_price; }
   [[nodiscard]] auto name() const { return m_name; }
   [[nodiscard]] auto description() const { return m_description; }
@@ -39,7 +39,6 @@ public:
         const QString description = "");
 
 protected:
-  
   Product(const quint64 price, const QString name, const QString description)
       : ProductBase{ProductType::Basic}, m_price{price}, m_name{name},
         m_description{description} {};
@@ -60,7 +59,6 @@ protected:
     out << m_name;
     out << m_description;
   }
-  
 };
 
 class BasicProduct : public Product {
@@ -68,12 +66,11 @@ protected:
   BasicProduct(const quint64 price, const QString name,
                const QString description)
       : Product(price, name, description), ProductBase{ProductType::Basic} {}
-  BasicProduct(const Id & id, const quint64 price, const QString name,
+  BasicProduct(const Id &id, const quint64 price, const QString name,
                const QString description)
-      : Product(price, name, description), ProductBase{ProductType::Basic, id} {}
+      : Product(price, name, description), ProductBase{ProductType::Basic, id} {
+  }
   BasicProduct(QDataStream &in)
       : Product(in), ProductBase{ProductType::Basic, in} {}
   friend class Product;
 };
-
-
