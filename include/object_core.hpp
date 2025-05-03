@@ -4,67 +4,76 @@
 #include <QIODevice>
 #include <QJsonObject>
 #include <QRandomGenerator>
+#include <iostream>
+#include <iomanip>
 
-enum HashSecurity : quint8 {
-  VeryLow = 4,
-  Low = 8,
-  Medium = 12,
-  High = 16,
-  VeryHigh = 32
+namespace Core
+{
+  enum HashSecurity : quint8 {
+    VeryLow = 4,
+    Low = 8,
+    Medium = 12,
+    High = 16,
+    VeryHigh = 32
+  };
+
+  template <HashSecurity S> class Id : public std::array<quint8, static_cast<size_t>(S)>
+{
+  using std::array<quint8, static_cast<size_t>(S)>::array;
+  public:
+  Id(){
+    QRandomGenerator::global()->fillRange(
+        reinterpret_cast<quint32 *>(this->data()), static_cast<int>(S) / 4);
+  }
+  friend QDataStream &operator<<(QDataStream &out, const Id &obj){
+      out.writeRawData(reinterpret_cast<const char *>(obj.data()), static_cast<int>(S));
+      return out;
+  }
+  friend QDataStream &operator>>(QDataStream &in, Id &obj){
+      in.readRawData(reinterpret_cast<char *>(obj.data()), static_cast<int>(S));
+      return in;
+  }
+friend std::ostream &operator<<(std::ostream &os, const Id<S> &id) {
+        os << std::hex << std::setfill('0');
+        for (quint8 byte : id) {
+            os << std::setw(2) << static_cast<int>(byte);
+        }
+        os << std::dec;
+        return os;
+    }
 };
 
-template <HashSecurity S> using Id = std::array<quint8, static_cast<size_t>(S)>;
-
-template <class T, HashSecurity S> class CoreBase {
-  [[nodiscard]] Id<S> generateId() const {
-    const size_t idSize = static_cast<size_t>(S);
-    Id<S> id;
-    QRandomGenerator::global()->fillRange(
-        reinterpret_cast<quint32 *>(id.data()), idSize / 4);
-    return id;
+template <class T, HashSecurity S> class Base {  
+  const Id<S> m_id;
+ public: 
+  [[nodiscard]] QByteArray binary() const {
+    QByteArray bin;
+    auto buffer = QDataStream(&bin, QIODevice::WriteOnly | QIODevice::Append);
+    serialize(buffer);
+    return bin;
   }
-  [[nodiscard]] Id<S> fromQByteArray(const QByteArray &bytes) {
-    constexpr size_t size = static_cast<size_t>(S);
+  
+  [[nodiscard]] auto type() const { return m_type; }
 
-    if (bytes.size() != size)
-      return Id<S>{};
-
-    Id<S> result;
-    std::memcpy(result.data(), bytes.constData(), size);
-    return result;
+  [[nodiscard]] auto id() const {
+    return m_id;
   }
-  const std::array<quint8, static_cast<size_t>(S)> m_id;
-
+  
 protected:
   const T m_type;
-
-  CoreBase(T typ) : m_type(typ), m_id{generateId()} {}
-  CoreBase(T typ, QByteArray id) : m_type(typ), m_id{fromQByteArray(id)} {}
-  CoreBase(T typ, const QJsonObject &val)
-      : CoreBase(typ, QByteArray::fromHex(val["id"].toString().toUtf8()))
-  {}
-  CoreBase(T typ, QDataStream &in)
-      : CoreBase(typ, [&in]() {
-          in.setByteOrder(QDataStream::LittleEndian);
-          QByteArray bytes(static_cast<size_t>(S), Qt::Uninitialized);
-          if (in.readRawData(bytes.data(), static_cast<int>(S)) !=
-              static_cast<int>(S)) {
-            return QByteArray();
-          }
-          return bytes;
-        }()) {}
+  Base(T typ) : m_type(typ), m_id{} {}
+  Base(T typ, const Id<S> &id) : m_type(typ), m_id{id} {}
+  Base(T typ, QDataStream &in)
+        : Base(typ, [&in]() -> Id<S> {
+            Id<S> id;
+            in >> id;
+            return id;
+          }()) {}
 
   virtual void serialize(QDataStream &out) const {
     out << m_type;
-    const auto id_ = id();
-    out.writeRawData(id_.data(), id_.size());
+    out << m_id;
   }
-
-  virtual void addJson(QJsonObject &var) const {
-    var.insert("type", (int)m_type);
-    var.insert("id", QString(id().toHex()));
-  }
-  [[nodiscard]] static T getType(const QJsonObject &val) { return ((T) val["type"].toInt()); }
 
   [[nodiscard]]
   static T getType(QDataStream &val) {
@@ -73,24 +82,8 @@ protected:
     return type_;
   }
 
-public:
-  QByteArray binary() const {
-    QByteArray bin;
-    auto buffer = QDataStream(&bin, QIODevice::WriteOnly | QIODevice::Append);
-    buffer.setByteOrder(QDataStream::LittleEndian);
-    serialize(buffer);
-    return bin;
-  }
-  QJsonObject json() const {
-    QJsonObject js;
-    addJson(js);
-    return js;
-  }
-
-  [[nodiscard]] auto type() const { return m_type; }
-
-  [[nodiscard]] QByteArray id() const {
-    return QByteArray(reinterpret_cast<const char *>(m_id.data()),
-                      static_cast<size_t>(S));
-  }
 };
+}
+
+
+
