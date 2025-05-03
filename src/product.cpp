@@ -5,15 +5,15 @@ std::shared_ptr<Product> Product::Basic(const quint64 price, const QString name,
   return std::shared_ptr<Product>{new BasicProduct(price, name, description)};
 }
 
-template <typename T> std::shared_ptr<Product> Product::from(T &val) {
-  const auto type = CoreBase::getType(val);
+std::shared_ptr<Product> Product::from(QDataStream &in) {
+  const auto type = ProductBase::getType(in);
+  std::shared_ptr<Product> result;
   switch (type) {
   case ProductType::Basic:
-    return std::shared_ptr<Product>{new BasicProduct(val)};
+    result = std::shared_ptr<Product>{new BasicProduct(in)};
+    break;
   default:
     return nullptr;
   }
+  return (in.status() == QDataStream::Ok) ? result : nullptr;
 }
-
-template std::shared_ptr< Product> Product::from<const QJsonObject>(const QJsonObject &val);
-template std::shared_ptr< Product> Product::from<QDataStream>(QDataStream &val);
