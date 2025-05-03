@@ -29,14 +29,27 @@ include(InstallRequiredSystemLibraries)
 
 find_package(Qt6 COMPONENTS Core)
 add_library(Core include/object_core.hpp src/object_core.cpp
-                 include/product.hpp src/product.cpp)
+                 include/product.hpp src/product.cpp include/request.hpp src/request.cpp include/reply.hpp src/reply.cpp
+                 )
 target_include_directories(
   Core PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
               "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Esterv/>")
 target_link_libraries(Core PUBLIC Qt6::Core)
 
-if(BUILD_SERVER)
 
+
+if(BUILD_SERVER)
+FetchContent_Declare(
+    Boost
+    URL https://github.com/boostorg/boost/releases/download/boost-1.86.0/boost-1.86.0-cmake.7z
+    URL_MD5 c33bf9137ff5ff1d3d0f28af212c9704
+    FIND_PACKAGE_ARGS 1.86 COMPONENTS system CONFIG)
+  set(BOOST_INCLUDE_LIBRARIES asio beast system)
+  set(BOOST_ENABLE_CMAKE ON)
+  FetchContent_MakeAvailable(Boost)
+add_library(TCPServer src/server.hpp src/server.cpp src/session.hpp src/session.cpp)
+target_link_libraries(TCPServer PUBLIC Qt6::Core)
+target_link_libraries(TCPServer PRIVATE Core)
 endif(BUILD_SERVER)
 
 if(BUILD_CLIENT)
