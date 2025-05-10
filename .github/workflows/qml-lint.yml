@@ -1,4 +1,4 @@
-name: qmllintbot
+name: lintbot
 run-name: Linting QML for PR
 on:
 
@@ -7,8 +7,8 @@ on:
     types:
       - completed
 jobs:
-  qmllint-comment:
-    uses: EddyTheCo/Common/.github/workflows/qml-lint.yml@v0.5.2
+  lint-comment:
+    uses: EddyTheCo/Common/.github/workflows/lint.yml@develop
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
       actions: read
