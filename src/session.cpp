@@ -1,21 +1,31 @@
 #include "session.hpp"
 #include "request.hpp"
 #include "server.hpp"
+
+#include <QDataStream>
+#include <algorithm>
+#include <boost/asio/buffer.hpp>
+#include <boost/system/detail/error_code.hpp>
+#include <cstdint>
+#include <utility>
+
 namespace TCP {
 
-Session::Session(boost::asio::ip::tcp::tcp::socket socket)
-    : socket_(std::move(socket)) {}
+Session::Session(boost::asio::ip::tcp::tcp::socket socket, std::weak_ptr<Server> server)
+    : socket_(std::move(socket))
+    , server_{std::move(server)}
+{}
 
 void Session::start() { do_read(); }
 void Session::do_read() {
   auto self(shared_from_this());
   socket_.async_read_some(boost::asio::buffer(read_buffer_),
-                          [this, self](boost::system::error_code ec,
+                          [this, self](boost::system::error_code error_code,
                                        std::size_t bytes_transferred) {
-                            if (!ec && bytes_transferred > 0) {
-                              parse_read(bytes_transferred);
-                              do_read();
-                            }
+                              if (!error_code && bytes_transferred > 0) {
+                                  parse_read(bytes_transferred);
+                                  do_read();
+                              }
                           });
 }
 void Session::parse_read(const std::size_t lenght) {
@@ -52,11 +62,15 @@ void Session::parse_read(const std::size_t lenght) {
   }
 }
 void Session::parse_request(QByteArray request_data) {
-  QDataStream in(&request_data, QIODevice::ReadOnly);
-  auto request = Request::from(in);
-  /*if(Server::reply_callback_&&request) {
-      // This should be inside a trhead
-      auto reply = Server::reply_callback_(request);
-  }*/
+    QDataStream buffer(&request_data, QIODevice::ReadOnly);
+
+    auto request = Request::from(buffer);
+    auto server = server_.lock();
+    if (request && server != nullptr) {
+        auto reply = server->reply_callback_(request);
+    } else {
+        // close the session//
+    }
 }
+void Session::do_write(const std::vector<uint8_t> &packet_data) {}
 } // namespace TCP
