@@ -4,8 +4,11 @@
 #include <QIODevice>
 #include <QJsonObject>
 #include <QRandomGenerator>
+#include <array>
+#include <cstddef>
 #include <iomanip>
 #include <iostream>
+#include <qtypes.h>
 
 namespace Core {
 enum HashSecurity : quint8 {
@@ -22,64 +25,84 @@ class Id : public std::array<quint8, static_cast<size_t>(S)> {
 
 public:
   Id() {
-    QRandomGenerator::global()->fillRange(
-        reinterpret_cast<quint32 *>(this->data()), static_cast<int>(S) / 4);
+      QRandomGenerator::global()->fillRange(reinterpret_cast<quint32 *>(this->data()),
+                                            static_cast<int>(S) / 4);
   }
-  friend QDataStream &operator<<(QDataStream &out, const Id &obj) {
-    out.writeRawData(reinterpret_cast<const char *>(obj.data()),
-                     static_cast<int>(S));
-    return out;
+  friend auto operator<<(QDataStream &out_stream, const Id &obj) -> decltype(out_stream) &
+  {
+      out_stream.writeRawData(reinterpret_cast<const char *>(obj.data()), static_cast<int>(S));
+      return out_stream;
   }
-  friend QDataStream &operator>>(QDataStream &in, Id &obj) {
-    in.readRawData(reinterpret_cast<char *>(obj.data()), static_cast<int>(S));
-    return in;
+  friend auto operator>>(QDataStream &in_stream, Id &obj) -> decltype(in_stream) &
+  {
+      in_stream.readRawData(reinterpret_cast<char *>(obj.data()), static_cast<int>(S));
+      return in_stream;
   }
-  friend std::ostream &operator<<(std::ostream &os, const Id<S> &id) {
-    os << std::hex << std::setfill('0');
-    for (quint8 byte : id) {
-      os << std::setw(2) << static_cast<int>(byte);
-    }
-    os << std::dec;
-    return os;
+  friend auto operator<<(std::ostream &out_stream, const Id<S> &identifier)
+      -> decltype(out_stream) &
+  {
+      out_stream << std::hex << std::setfill('0');
+      for (quint8 byte : identifier) {
+          out_stream << std::setw(2) << static_cast<int>(byte);
+      }
+      out_stream << std::dec;
+      return out_stream;
   }
 };
 
 template <class T, HashSecurity S> class Base {
-  const Id<S> m_id;
+    const Id<S> identifier_;
+    const T type_;
 
 public:
-  [[nodiscard]] QByteArray binary() const {
-    QByteArray bin;
-    auto buffer = QDataStream(&bin, QIODevice::WriteOnly | QIODevice::Append);
-    serialize(buffer);
-    return bin;
-  }
+    Base(const Base &) = delete;
+    auto operator=(const Base &) -> Base & = delete;
 
-  [[nodiscard]] auto type() const { return m_type; }
+    Base(Base &&) = delete;
+    auto operator=(Base &&) -> Base & = delete;
 
-  [[nodiscard]] auto id() const { return m_id; }
+    [[nodiscard]] auto binary() const -> QByteArray
+    {
+        QByteArray bin;
+        auto buffer = QDataStream(&bin, QIODevice::WriteOnly | QIODevice::Append);
+        serialize(buffer);
+        return bin;
+    }
+
+    [[nodiscard]] auto type() const { return type_; }
+
+    [[nodiscard]] auto id() const { return identifier_; }
 
 protected:
-  const T m_type;
-  Base(T typ) : m_type(typ), m_id{} {}
-  Base(T typ, const Id<S> &id) : m_type(typ), m_id{id} {}
-  Base(T typ, QDataStream &in)
-      : Base(typ, [&in]() -> Id<S> {
-          Id<S> id;
-          in >> id;
-          return id;
-        }()) {}
+    Base(T typ)
+        : type_{typ}
+        , identifier_{}
+    {}
+    Base(T typ, const Id<S> &identifier)
+        : type_{typ}
+        , identifier_{identifier}
+    {}
+    Base(T typ, QDataStream &in_stream)
+        : Base(typ, [&in_stream]() -> Id<S> {
+            Id<S> identifier;
+            in_stream >> identifier;
+            return identifier;
+        }())
+    {}
+    ~Base() = default;
 
-  virtual void serialize(QDataStream &out) const {
-    out << m_type;
-    out << m_id;
-  }
+    virtual void serialize(QDataStream &out) const
+    {
+        out << type_;
+        out << identifier_;
+    }
 
-  [[nodiscard]]
-  static T getType(QDataStream &val) {
-    T type_;
-    val >> type_;
-    return type_;
-  }
+    [[nodiscard]]
+    static auto getType(QDataStream &val) -> T
+    {
+        T type;
+        val >> type;
+        return type;
+    }
 };
 } // namespace Core
