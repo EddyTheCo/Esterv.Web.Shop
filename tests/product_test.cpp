@@ -7,17 +7,17 @@ TEST(Product, Initialization) {
   EXPECT_EQ(product_1->name(), "");
   EXPECT_EQ(product_1->description(), "");
 
-  const auto product_2 = Product::Basic(10u, "Bath Gel", "Bath Gel to bath");
-  EXPECT_EQ(product_2->price(), 10u);
+  const auto product_2 = Product::Basic("Bath Gel", 10U, "Bath Gel to bath");
+  EXPECT_EQ(product_2->price(), 10U);
   EXPECT_EQ(product_2->name(), "Bath Gel");
   EXPECT_EQ(product_2->description(), "Bath Gel to bath");
 }
 
 TEST(Product, Serialization) {
-  const auto product = Product::Basic(10u, "Bath Gel", "Bath Gel to bath");
-  auto product_bin = product->binary();
-  auto buffer = QDataStream(&product_bin, QIODevice::ReadOnly);
-  const auto product_copy_from_bin = Product::from(buffer);
-  const auto product_copy_from_bin_bin = product_copy_from_bin->binary();
-  EXPECT_EQ(product_bin, product_copy_from_bin_bin);
+    const auto product = Product::Basic("Bath Gel", 10U, "Bath Gel to bath");
+    auto product_bin = product->binary();
+    auto buffer = QDataStream(&product_bin, QIODevice::ReadOnly);
+    const auto product_copy_from_bin = Product::from(buffer);
+    const auto product_copy_from_bin_bin = product_copy_from_bin->binary();
+    EXPECT_EQ(product_bin, product_copy_from_bin_bin);
 }

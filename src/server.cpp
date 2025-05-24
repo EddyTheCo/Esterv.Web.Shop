@@ -1,10 +1,12 @@
 #include "server.hpp"
+#include "reply.hpp"
 #include "session.hpp"
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/system/detail/error_code.hpp>
 #include <string>
+#include <utility>
 
 namespace TCP {
 

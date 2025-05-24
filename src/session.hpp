@@ -25,11 +25,11 @@ class Session : public std::enable_shared_from_this<Session> {
   ReadingState reading_state_{ReadingState::Size};
   quint32 request_size_{0};
   std::size_t bytes_read_{0};
-  std::array<uint8_t, PACKET_BUFFER_SIZE> packet_;
+  std::array<quint8, PACKET_BUFFER_SIZE> packet_;
 
   explicit Session(boost::asio::ip::tcp::tcp::socket socket,
                    std::weak_ptr<Server> server);
-  void do_write(const std::vector<uint8_t> &packet_data);
+  void do_write(const std::vector<quint8> &packet_data);
   void reply(const QByteArray &reply_data);
   void parse_read(std::size_t lenght);
   void parse_request(QByteArray request);

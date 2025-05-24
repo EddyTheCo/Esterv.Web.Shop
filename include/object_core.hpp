@@ -25,20 +25,18 @@ class Id : public std::array<quint8, static_cast<size_t>(S)> {
 
 public:
   Id() {
-    QRandomGenerator::global()->fillRange(
-        reinterpret_cast<quint32 *>(this->data()), static_cast<int>(S) / 4);
+      QRandomGenerator::global()->fillRange(reinterpret_cast<quint32 *>(this->data()),
+                                            static_cast<int>(S) / 4);
   }
-  friend auto operator<<(QDataStream &out_stream,
-                         const Id &obj) -> decltype(out_stream) & {
-    out_stream.writeRawData(reinterpret_cast<const char *>(obj.data()),
-                            static_cast<int>(S));
-    return out_stream;
+  friend auto operator<<(QDataStream &out_stream, const Id &obj) -> decltype(out_stream) &
+  {
+      out_stream.writeRawData(reinterpret_cast<const char *>(obj.data()), static_cast<int>(S));
+      return out_stream;
   }
   friend auto operator>>(QDataStream &in_stream,
                          Id &obj) -> decltype(in_stream) & {
-    in_stream.readRawData(reinterpret_cast<char *>(obj.data()),
-                          static_cast<int>(S));
-    return in_stream;
+      in_stream.readRawData(reinterpret_cast<char *>(obj.data()), static_cast<int>(S));
+      return in_stream;
   }
   friend auto operator<<(std::ostream &out_stream,
                          const Id<S> &identifier) -> decltype(out_stream) & {
@@ -82,7 +80,7 @@ protected:
           in_stream >> identifier;
           return identifier;
         }()) {}
-  ~Base() = default;
+  virtual ~Base() = default;
 
   virtual void serialize(QDataStream &out) const {
     out << type_;

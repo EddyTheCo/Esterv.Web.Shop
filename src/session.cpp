@@ -84,20 +84,21 @@ void Session::reply(const QByteArray &reply_data) {
   QDataStream stream(&packet, QIODevice::WriteOnly);
   stream << static_cast<quint32>(reply_data.size());
   packet.append(reply_data);
-  const std::vector<uint8_t> packet_data(packet.begin(), packet.end());
+  const std::vector<quint8> packet_data(packet.begin(), packet.end());
   do_write(packet_data);
 }
 
-void Session::do_write(const std::vector<uint8_t> &packet_data) {
-  auto self(shared_from_this());
-  boost::asio::async_write(socket_,
-                           boost::asio::buffer(packet_data, packet_data.size()),
-                           [this, self](boost::system::error_code error_code,
-                                        std::size_t /*length*/) {
-                             if (error_code) {
-                               BOOST_LOG_TRIVIAL(error) << error_code.message();
-                               socket_.close();
-                             }
-                           });
+void Session::do_write(const std::vector<quint8> &packet_data)
+{
+    auto self(shared_from_this());
+    boost::asio::async_write(socket_,
+                             boost::asio::buffer(packet_data, packet_data.size()),
+                             [this, self](boost::system::error_code error_code,
+                                          std::size_t /*length*/) {
+                                 if (error_code) {
+                                     BOOST_LOG_TRIVIAL(error) << error_code.message();
+                                     socket_.close();
+                                 }
+                             });
 }
 } // namespace TCP

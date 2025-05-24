@@ -38,23 +38,29 @@ public:
     }
   }
 
-  [[nodiscard]] static auto
-  Basic(quint64 price = 0, QString name = "",
-        QString description = "") -> std::shared_ptr<Product>;
+  [[nodiscard]] static auto Basic(QString name = "", quint64 price = 0, QString description = "")
+      -> std::shared_ptr<Product>;
 
-protected:
-  Product(const quint64 price, const QString name, const QString description)
-      : ProductBase{ProductType::Basic}, price_{price}, name_{name},
-        description_{description} {}
-  Product(const Id &id, const quint64 price, const QString name,
-          const QString description)
-      : ProductBase{ProductType::Basic, id}, price_{price}, name_{name},
-        description_{description} {}
+  protected:
+  Product(const QString &name, const quint64 price, const QString &description)
+      : ProductBase{ProductType::Basic}
+      , price_{price}
+      , name_{name}
+      , description_{description}
+  {}
+  Product(const Id &identifier, const QString &name, const quint64 price, const QString &description)
+      : ProductBase{ProductType::Basic, identifier}
+      , price_{price}
+      , name_{name}
+      , description_{description}
+  {}
 
-  Product(QDataStream &in_stream) : ProductBase{ProductType::Basic, in_stream} {
-    in_stream >> price_;
-    in_stream >> name_;
-    in_stream >> description_;
+  Product(QDataStream &in_stream)
+      : ProductBase{ProductType::Basic, in_stream}
+  {
+      in_stream >> price_;
+      in_stream >> name_;
+      in_stream >> description_;
   }
 
   void serialize(QDataStream &out) const override {
@@ -67,14 +73,17 @@ protected:
 
 class BasicProduct : public Product {
 protected:
-  BasicProduct(const quint64 price, const QString &name,
-               const QString &description)
-      : Product(price, name, description), ProductBase{ProductType::Basic} {}
-  BasicProduct(const Id &id, const quint64 price, const QString name,
-               const QString &description)
-      : Product(price, name, description), ProductBase{ProductType::Basic, id} {
-  }
-  BasicProduct(QDataStream &in_stream)
-      : Product(in_stream), ProductBase{ProductType::Basic, in_stream} {}
-  friend class Product;
+    BasicProduct(const QString &name, const quint64 price, const QString &description)
+        : Product(name, price, description)
+        , ProductBase{ProductType::Basic}
+    {}
+    BasicProduct(const Id &id, const QString name, const quint64 price, const QString &description)
+        : Product(name, price, description)
+        , ProductBase{ProductType::Basic, id}
+    {}
+    BasicProduct(QDataStream &in_stream)
+        : Product(in_stream)
+        , ProductBase{ProductType::Basic, in_stream}
+    {}
+    friend class Product;
 };

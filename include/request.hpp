@@ -31,6 +31,7 @@ protected:
       : RequestBase{RequestType::Products, in_stream} {
     in_stream >> method_;
   }
+  virtual ~Request() = default;
 
   void serialize(QDataStream &out) const override {
     RequestBase::serialize(out);

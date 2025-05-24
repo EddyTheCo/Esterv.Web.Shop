@@ -36,6 +36,7 @@ protected:
           in_stream >> identifier;
           return identifier;
         }()} {}
+  virtual ~Reply() = default;
 
   void serialize(QDataStream &out) const override {
     ReplyBase::serialize(out);
