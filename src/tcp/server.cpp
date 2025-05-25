@@ -5,7 +5,6 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/system/detail/error_code.hpp>
-#include <string>
 #include <utility>
 
 namespace TCP {
@@ -26,10 +25,9 @@ void Server::do_accept() {
   acceptor_.async_accept([this](boost::system::error_code error_code,
                                 boost::asio::ip::tcp::socket socket) {
     if (!error_code) {
-      std::shared_ptr<Session>(
-          new Session(std::move(socket),
-                      std::weak_ptr<Server>(shared_from_this())))
-          ->start();
+        std::shared_ptr<Session>(new Session(std::move(socket),
+                                             std::weak_ptr<Server>(shared_from_this())))
+            ->start(); // should be multithreading //
     }
     do_accept();
   });
