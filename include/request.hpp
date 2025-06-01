@@ -5,7 +5,7 @@
 #include <qtypes.h>
 
 enum class RequestType : quint8 { Products };
-constexpr Core::HashSecurity RequestHashSecurity = Core::Low;
+constexpr Core::HashSecurity RequestHashSecurity = Core::HashSecurity::Low;
 using RequestBase = Core::Base<RequestType, RequestHashSecurity>;
 
 class Request : virtual public RequestBase {

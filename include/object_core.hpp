@@ -11,13 +11,7 @@
 #include <qtypes.h>
 
 namespace Core {
-enum HashSecurity : quint8 {
-  VeryLow = 4,
-  Low = 8,
-  Medium = 12,
-  High = 16,
-  VeryHigh = 32
-};
+enum class HashSecurity : quint8 { VeryLow = 4, Low = 8, Medium = 12, High = 16, VeryHigh = 32 };
 
 template <HashSecurity S>
 class Id : public std::array<quint8, static_cast<size_t>(S)> {

@@ -5,7 +5,7 @@
 #include <qtypes.h>
 
 enum class ProductType : quint8 { Basic };
-constexpr Core::HashSecurity ProductHashSecurity = Core::High;
+constexpr Core::HashSecurity ProductHashSecurity = Core::HashSecurity::High;
 using ProductBase = Core::Base<ProductType, ProductHashSecurity>;
 
 class Product : virtual public ProductBase {
