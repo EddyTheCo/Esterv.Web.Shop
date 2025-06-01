@@ -1,8 +1,11 @@
-#include "session.hpp"
+#include "tcp/session.hpp"
+#include "boost/asio/ip/tcp.hpp"
 #include "request.hpp"
-#include "server.hpp"
+#include "tcp/server.hpp"
+#include "tcp/socket_buffer.hpp"
 
 #include <QDataStream>
+#include <cstddef>
 #include <memory>
 #include <qtypes.h>
 #include <utility>
@@ -43,7 +46,7 @@ void Session::reply(const QByteArray &reply_data) {
   QDataStream stream(&packet, QIODevice::WriteOnly);
   stream << static_cast<quint32>(reply_data.size());
   packet.append(reply_data);
-  auto data_ptr = reinterpret_cast<const std::byte *>(packet.constData());
+  const auto *data_ptr = reinterpret_cast<const std::byte *>(packet.constData());
   const std::vector<std::byte> packet_data(data_ptr, data_ptr + packet.size());
   do_write(packet_data);
 }
