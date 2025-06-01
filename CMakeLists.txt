@@ -43,22 +43,34 @@ target_include_directories(
               "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Esterv/>")
 target_link_libraries(Core PUBLIC Qt6::Core)
 
-if(BUILD_SERVER)
-  FetchContent_Declare(
+if(BUILD_SERVER OR BUILD_CLIENT)
+FetchContent_Declare(
     Boost
     URL https://github.com/boostorg/boost/releases/download/boost-1.86.0/boost-1.86.0-cmake.7z
     URL_MD5 c33bf9137ff5ff1d3d0f28af212c9704
-    FIND_PACKAGE_ARGS 1.86 COMPONENTS system CONFIG)
-  set(BOOST_INCLUDE_LIBRARIES asio beast system)
+    FIND_PACKAGE_ARGS 1.86 COMPONENTS asio log CONFIG)
+  set(BOOST_INCLUDE_LIBRARIES asio system log)
   set(BOOST_ENABLE_CMAKE ON)
   FetchContent_MakeAvailable(Boost)
-  add_library(TCPServer src/server.hpp src/server.cpp src/session.hpp
-                        src/session.cpp)
-  target_link_libraries(TCPServer PUBLIC Qt6::Core)
-  target_link_libraries(TCPServer PRIVATE Core)
+endif(BUILD_SERVER OR BUILD_CLIENT)
+
+if(BUILD_SERVER)
+  add_library(TCPServer include/tcp/server.hpp src/tcp/server.cpp include/tcp/session.hpp
+                        src/tcp/session.cpp include/tcp/socket_buffer.hpp src/tcp/socket_buffer.cpp)
+  target_include_directories(
+  TCPServer PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+              "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Esterv/>")
+  target_link_libraries(TCPServer PUBLIC Qt6::Core Boost::asio)
+  target_link_libraries(TCPServer PRIVATE Core  Boost::log)
 endif(BUILD_SERVER)
 
 if(BUILD_CLIENT)
+  add_library(TCPClient include/tcp/client.hpp src/tcp/client.cpp include/tcp/socket_buffer.hpp src/tcp/socket_buffer.cpp)
+  target_include_directories(
+  TCPClient PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+              "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Esterv/>")
+  target_link_libraries(TCPClient PUBLIC Qt6::Core Boost::asio)
+  target_link_libraries(TCPClient PRIVATE Core  Boost::log)
 
 endif(BUILD_CLIENT)
 

@@ -8,7 +8,7 @@
 #include <vector>
 
 enum class ReplyType : quint8 { Products };
-constexpr Core::HashSecurity ReplyHashSecurity = Core::VeryLow;
+constexpr Core::HashSecurity ReplyHashSecurity = Core::HashSecurity::VeryLow;
 using ReplyBase = Core::Base<ReplyType, ReplyHashSecurity>;
 
 class Reply : virtual public ReplyBase {
@@ -36,6 +36,7 @@ protected:
           in_stream >> identifier;
           return identifier;
         }()} {}
+  virtual ~Reply() = default;
 
   void serialize(QDataStream &out) const override {
     ReplyBase::serialize(out);

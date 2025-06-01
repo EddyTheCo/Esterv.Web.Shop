@@ -3,9 +3,10 @@
 #include <QString>
 #include <qtypes.h>
 
-auto Product::Basic(const quint64 price, const QString name,
-                    const QString description) -> std::shared_ptr<Product> {
-  return std::shared_ptr<Product>{new BasicProduct(price, name, description)};
+auto Product::Basic(const QString name, const quint64 price, const QString description)
+    -> std::shared_ptr<Product>
+{
+    return std::shared_ptr<Product>{new BasicProduct(name, price, description)};
 }
 
 auto Product::from(QDataStream &in_stream) -> std::shared_ptr<Product> {
